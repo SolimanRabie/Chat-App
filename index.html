@@ -1,73 +1,312 @@
 <!doctype html>
 <html>
   <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Socket.IO chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.IO Chat</title>
     <style>
-      body {
-        margin: 0;
-        padding-bottom: 3rem;
+      :root {
+        color-scheme: light;
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
           Arial, sans-serif;
+        background-color: #f3f6fb;
+        color: #20232a;
       }
 
-      #form {
-        background: rgba(0, 0, 0, 0.15);
-        padding: 0.25rem;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        display: flex;
-        height: 3rem;
+      * {
         box-sizing: border-box;
-        backdrop-filter: blur(10px);
       }
-      #input {
-        border: none;
-        padding: 0 1rem;
-        flex-grow: 1;
-        border-radius: 2rem;
-        margin: 0.25rem;
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
       }
-      #input:focus {
-        outline: none;
+
+      body {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1.2rem;
+        background:
+          radial-gradient(circle at top left, #accbee 0%, transparent 34%),
+          radial-gradient(circle at bottom right, #d8e7ff 0%, transparent 28%),
+          linear-gradient(180deg, #eef4fd 0%, #fdfaff 100%);
+        overflow: hidden;
       }
-      #form > button {
-        background: #333;
-        border: none;
-        padding: 0 1rem;
-        margin: 0.25rem;
-        border-radius: 3px;
-        outline: none;
-        color: #fff;
+
+      body::before {
+        content: "";
+        position: absolute;
+        width: 34rem;
+        height: 34rem;
+        top: -10rem;
+        right: -12rem;
+        background: radial-gradient(
+          circle,
+          rgba(79, 137, 238, 0.18),
+          transparent 60%
+        );
+        filter: blur(28px);
+        pointer-events: none;
+      }
+
+      body::after {
+        content: "";
+        position: absolute;
+        width: 24rem;
+        height: 24rem;
+        left: -8rem;
+        bottom: -8rem;
+        background: radial-gradient(
+          circle,
+          rgba(28, 198, 202, 0.14),
+          transparent 58%
+        );
+        filter: blur(34px);
+        pointer-events: none;
+      }
+
+      .chat-app {
+        width: min(100%, 780px);
+        height: min(100vh, 940px);
+        display: flex;
+        flex-direction: column;
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 32px 120px rgba(15, 34, 73, 0.14);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(18px);
+        margin-bottom: 1.25rem;
+      }
+
+      .chat-header {
+        padding: 1.2rem 1.4rem 0.95rem;
+        background: linear-gradient(135deg, #476fcf 0%, #1b2d5d 100%);
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .chat-header .header-top {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+      }
+
+      .chat-header .channel-info {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+      }
+
+      .chat-header .channel-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.18);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+        font-weight: 700;
+        font-size: 1rem;
+      }
+
+      .chat-header h1 {
+        margin: 0;
+        font-size: 1.2rem;
+        letter-spacing: 0.02em;
+      }
+
+      .chat-header p {
+        margin: 0;
+        opacity: 0.92;
+        font-size: 0.95rem;
+        max-width: 88%;
+      }
+
+      .chat-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem 1rem 0;
+        gap: 0.75rem;
+        background: #f3f7fd;
       }
 
       #messages {
-        list-style-type: none;
+        list-style: none;
         margin: 0;
-        padding: 0;
+        padding: 1.2rem 0 1rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        overflow-y: auto;
+        padding-right: 1rem;
       }
-      #messages > li {
-        padding: 0.5rem 1rem;
+
+      #messages::-webkit-scrollbar {
+        width: 8px;
       }
-      #messages > li:nth-child(odd) {
-        background: #efefef;
+
+      #messages::-webkit-scrollbar-thumb {
+        background: rgba(90, 104, 138, 0.25);
+        border-radius: 999px;
+      }
+
+      .message {
+        max-width: 78%;
+        padding: 1rem 1.1rem;
+        border-radius: 24px;
+        line-height: 1.5;
+        word-break: break-word;
+        box-shadow: 0 8px 24px rgba(20, 32, 72, 0.06);
+      }
+
+      .message.received {
+        align-self: flex-start;
+        background: #ffffff;
+        color: #1f2937;
+      }
+
+      .message.sent {
+        align-self: flex-end;
+        background: #4b6cb7;
+        color: #ffffff;
+      }
+
+      .message .sender {
+        display: block;
+        font-size: 0.78rem;
+        margin-bottom: 0.4rem;
+        font-weight: 600;
+        opacity: 0.85;
+      }
+
+      .message.received .sender {
+        color: #4b5563;
+      }
+
+      .message.sent .sender {
+        color: rgba(255, 255, 255, 0.92);
+      }
+
+      .typing-row {
+        min-height: 1.5rem;
+        color: #4768a9;
+        font-size: 0.95rem;
+        padding: 0 0.75rem;
+      }
+
+      form {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem 1.75rem;
+        background: #ffffff;
+        border-top: 1px solid rgba(44, 62, 129, 0.08);
+      }
+
+      #input {
+        width: 100%;
+        min-width: 0;
+        border: 1px solid #d2d8e2;
+        border-radius: 999px;
+        padding: 0.95rem 1.25rem;
+        font-size: 1rem;
+        outline: none;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      #input:focus {
+        border-color: #4b6cb7;
+        box-shadow: 0 0 0 4px rgba(75, 108, 183, 0.12);
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        background: #4b6cb7;
+        color: #fff;
+        padding: 0 1.6rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease;
+      }
+
+      button:hover {
+        background: #314e91;
+        transform: translateY(-1px);
+      }
+
+      @media (max-width: 520px) {
+        body {
+          padding: 0.5rem;
+        }
+
+        .chat-app {
+          height: 100vh;
+          border-radius: 0;
+        }
+
+        form {
+          padding: 0.75rem 0.85rem 1rem;
+        }
+
+        .chat-header {
+          padding: 1rem 1rem 0.85rem;
+        }
+
+        .chat-header .header-meta {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.8rem;
+        }
       }
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
-    <form id="form" action="">
-      <p id="typing"></p>
+    <div class="chat-app">
+      <header class="chat-header">
+        <div class="header-top">
+          <div class="channel-icon">SR</div>
+          <div>
+            <h1>Family Chat</h1>
+            <p>where love, laughs, and a little chaos come together ❤️</p>
+            <!-- <p>Connect instantly in a friendly Socket.IO room.</p> -->
+          </div>
+        </div>
+      </header>
 
-      <input id="input" autocomplete="off" /><button>Send</button>
-    </form>
-    <!-- socket client library -->
+      <section class="chat-main">
+        <ul id="messages"></ul>
+        <div class="typing-row"><span id="typing"></span></div>
+      </section>
+
+      <form id="form" action="">
+        <input
+          id="input"
+          autocomplete="off"
+          placeholder="Type your message..."
+        />
+        <button type="submit">Send</button>
+      </form>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
+      const currentUser =
+        prompt("Enter your name:")?.trim() ||
+        `Guest-${Math.floor(Math.random() * 1000)}`;
 
       const form = document.getElementById("form");
       const input = document.getElementById("input");
@@ -76,26 +315,54 @@
 
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-        if (input.value) {
-          socket.emit("chat message", input.value);
-          input.value = "";
-        }
+
+        const value = input.value.trim();
+        if (!value) return;
+
+        socket.emit("chat message", {
+          user: currentUser,
+          text: value,
+        });
+
+        input.value = "";
       });
 
-      socket.on("send_messages_to_all_users", (data) => {
-        console.log("data from send_messages_to_all_users", data);
+      socket.on("send_messages_to_all_users", (message) => {
         const item = document.createElement("li");
-        item.textContent = data;
+
+        if (message.user === currentUser) {
+          item.className = "message sent";
+        } else {
+          item.className = "message received";
+          const sender = document.createElement("span");
+          sender.className = "sender";
+          sender.textContent = message.user;
+          item.appendChild(sender);
+        }
+
+        const text = document.createElement("span");
+        text.textContent = message.text;
+
+        item.appendChild(text);
         messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
+        messages.scrollTop = messages.scrollHeight;
       });
 
       input.addEventListener("keydown", () => {
-        socket.emit("typing");
+        socket.emit("typing", currentUser);
       });
 
-      socket.on("show_typing_status", () => {
-        typingStatus.innerHTML = "client is typing...";
+      socket.on("show_typing_status", (user) => {
+        if (user === currentUser) return;
+        typingStatus.textContent = `${user} is typing...`;
+      });
+
+      input.addEventListener("keyup", () => {
+        socket.emit("stop-typing");
+      });
+
+      socket.on("clear_typing_status", () => {
+        typingStatus.textContent = "";
       });
     </script>
   </body>

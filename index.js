@@ -15,13 +15,22 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("a user connected with socket id : ", socket.id);
 
-  socket.on("chat message", (msg) => {
-    console.log("message: " + msg);
+  socket.on("chat message", (message) => {
+    console.log("message: ", message);
 
-    io.emit("send_messages_to_all_users", msg);
+    io.emit("send_messages_to_all_users", message);
   });
-  socket.on("typing", () => {
-    socket.broadcast.emit("show_typing_status");
+
+  socket.on("typing", (user) => {
+    socket.broadcast.emit("show_typing_status", user);
+  });
+
+  socket.on("stop-typing", () => {
+    socket.broadcast.emit("clear_typing_status");
+  });
+
+  socket.on("stop-typing", () => {
+    socket.broadcast.emit("clear_typing_status");
   });
 });
 
