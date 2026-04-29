@@ -14,17 +14,21 @@ Users can chat instantly across multiple devices with live typing status.
 
 ## 📸 Screenshots
 
+### Start Page
+
+![Start Page](images/startPage.PNG)
+
 ### Home Screen
 
-![Home](screenshots/home.png)
+![Home](images/userCahtPNG.PNG)
 
 ### Chat UI
 
-![Chat](screenshots/chat.png)
+![Chat](images/chatGroup.PNG)
 
 ### Typing Status
 
-![Typing](screenshots/typing.png)
+![Typing](images/typingStatus.PNG)
 
 ## 🛠️ Tech Stack
 
